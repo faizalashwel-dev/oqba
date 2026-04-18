@@ -9,7 +9,24 @@ import 'pages/settings_page.dart';
 import 'pages/premium_page.dart';
 import 'pages/scanner_page.dart';
 import 'pages/merge_page.dart';
+import 'pages/organize/split_page.dart';
+import 'pages/organize/extract_pages_page.dart';
+import 'pages/organize/reorder_pages_page.dart';
+import 'pages/organize/delete_pages_page.dart';
+import 'pages/organize/rotate_pages_page.dart';
+import 'pages/convert/pdf_to_images_page.dart';
+import 'pages/convert/images_to_pdf_page.dart';
+import 'pages/convert/ocr_page.dart';
+import 'pages/extract_optimize/extract_images_page.dart';
+import 'pages/extract_optimize/extract_text_page.dart';
+import 'pages/extract_optimize/compress_page.dart';
+import 'pages/security/security_page.dart';
 import 'services/file_service.dart';
+
+/// Global PRO status flag.
+/// Flip to `true` to unlock all PRO features instantly for demo.
+/// In production, this would be backed by SharedPreferences or a purchase API.
+bool isPro = false;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +51,21 @@ class OqbaApp extends StatelessWidget {
       theme: ThemeData.light(),
       darkTheme: AppTheme.darkTheme,
       home: const OqbaShell(),
+      routes: {
+        '/premium': (_) => const PremiumPage(),
+        '/organize/split': (_) => const SplitPage(),
+        '/organize/extract-pages': (_) => const ExtractPagesPage(),
+        '/organize/reorder': (_) => const ReorderPagesPage(),
+        '/organize/delete': (_) => const DeletePagesPage(),
+        '/organize/rotate': (_) => const RotatePagesPage(),
+        '/convert/pdf-to-images': (_) => const PdfToImagesPage(),
+        '/convert/images-to-pdf': (_) => const ImagesToPdfPage(),
+        '/convert/ocr': (_) => const OcrPage(),
+        '/extract/images': (_) => const ExtractImagesPage(),
+        '/extract/text': (_) => const ExtractTextPage(),
+        '/extract/compress': (_) => const CompressPage(),
+        '/security': (_) => const SecurityPage(),
+      },
     );
   }
 }
