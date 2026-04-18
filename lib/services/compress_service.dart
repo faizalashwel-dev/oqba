@@ -104,6 +104,18 @@ class CompressService {
     // If compression didn't help, use stage1 result
     if (newSize >= originalSize) {
       final stage1Size = File(stage1Path).lengthSync();
+      
+      // If stage1 ALSO failed to compress (overhead added), return true original.
+      if (stage1Size >= originalSize) {
+         if (outputPath != stage1Path) { try { File(outputPath).deleteSync(); } catch (_) {} }
+         try { File(stage1Path).deleteSync(); } catch (_) {}
+         return CompressResult(
+           outputPath: pdfPath,
+           originalSizeBytes: originalSize,
+           newSizeBytes: originalSize,
+         );
+      }
+      
       // Clean up stage2 if not used
       if (outputPath != stage1Path) {
         try { File(outputPath).deleteSync(); } catch (_) {}

@@ -2,9 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/file_service.dart';
+import '../services/save_service.dart';
+import '../services/bundle_service.dart';
 import '../models/pdf_file_model.dart';
+import '../models/bundle_model.dart';
 import '../widgets/offline_indicator.dart';
 import '../widgets/skeleton_loader.dart';
+import 'bundle_viewer_page.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -20,7 +24,10 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   final FileService _fileService = FileService();
+  final SaveService _saveService = SaveService();
+  final BundleService _bundleService = BundleService();
   List<PdfFileModel> _files = [];
+  List<BundleModel> _bundles = [];
   bool _isLoading = true;
   String _searchQuery = '';
   bool _isSearching = false;
@@ -34,9 +41,11 @@ class HomePageState extends State<HomePage> {
   Future<void> loadFiles() async {
     setState(() => _isLoading = true);
     final files = await _fileService.listDocuments();
+    final bundles = await _bundleService.listBundles();
     if (mounted) {
       setState(() {
         _files = files;
+        _bundles = bundles;
         _isLoading = false;
       });
     }
@@ -95,28 +104,32 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _saveToDevice(PdfFileModel file) async {
+    final result = await _saveService.savePdfToDownloads(file.path);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result != null ? 'Saved to Downloads!' : 'Save failed — check permissions'),
+          backgroundColor: result != null ? AppTheme.primary : Colors.redAccent,
+        ),
+      );
+    }
+  }
+
   Future<void> _deleteFile(PdfFileModel file) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: AppTheme.surf(context),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete File',
-            style: TextStyle(color: AppTheme.textPrimary)),
+        title: Text('Delete File', style: TextStyle(color: AppTheme.txtPrimary(context))),
         content: Text(
           'Delete "${file.name}"?\nThis action cannot be undone.',
-          style: const TextStyle(color: AppTheme.textSecondary),
+          style: TextStyle(color: AppTheme.subtleText(context)),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child:
-                const Text('Delete', style: TextStyle(color: Colors.redAccent)),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Delete', style: TextStyle(color: Colors.redAccent))),
         ],
       ),
     );
@@ -135,22 +148,20 @@ class HomePageState extends State<HomePage> {
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: AppTheme.surf(context),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Rename File',
-            style: TextStyle(color: AppTheme.textPrimary)),
+        title: Text('Rename File', style: TextStyle(color: AppTheme.txtPrimary(context))),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: AppTheme.textPrimary),
+          style: TextStyle(color: AppTheme.txtPrimary(context)),
           decoration: InputDecoration(
             hintText: 'Enter new name',
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+            hintStyle: TextStyle(color: AppTheme.subtleText(context)),
             suffixText: '.pdf',
-            suffixStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+            suffixStyle: TextStyle(color: AppTheme.subtleText(context)),
             enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                  color: AppTheme.primary.withValues(alpha: 0.3)),
+              borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
             ),
             focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: AppTheme.primary),
@@ -158,14 +169,8 @@ class HomePageState extends State<HomePage> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Rename'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: Text('Rename')),
         ],
       ),
     );
@@ -173,6 +178,16 @@ class HomePageState extends State<HomePage> {
     if (newName != null && newName.isNotEmpty) {
       await _fileService.renameDocument(file.path, newName);
       await loadFiles();
+    }
+  }
+
+  void _openBundle(BundleModel bundle) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => BundleViewerPage(bundle: bundle)),
+    );
+    if (result == true) {
+      await loadFiles(); // Refresh if bundle was deleted
     }
   }
 
@@ -187,10 +202,10 @@ class HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Files',
                 style: TextStyle(
-                  color: AppTheme.textPrimary,
+                  color: AppTheme.txtPrimary(context),
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
                 ),
@@ -207,20 +222,15 @@ class HomePageState extends State<HomePage> {
                       }
                     },
                     child: Icon(
-                      _isSearching
-                          ? Icons.close_rounded
-                          : Icons.search_rounded,
-                      color: _isSearching
-                          ? AppTheme.primary
-                          : Colors.white.withValues(alpha: 0.4),
+                      _isSearching ? Icons.close_rounded : Icons.search_rounded,
+                      color: _isSearching ? AppTheme.primary : AppTheme.subtleText(context),
                       size: 24,
                     ),
                   ),
                   const SizedBox(width: 14),
                   GestureDetector(
                     onTap: _importFiles,
-                    child: Icon(Icons.add_circle_outline_rounded,
-                        color: Colors.white.withValues(alpha: 0.4), size: 24),
+                    child: Icon(Icons.add_circle_outline_rounded, color: AppTheme.subtleText(context), size: 24),
                   ),
                 ],
               ),
@@ -237,22 +247,18 @@ class HomePageState extends State<HomePage> {
                     child: TextField(
                       autofocus: true,
                       onChanged: (v) => setState(() => _searchQuery = v),
-                      style: const TextStyle(
-                          color: AppTheme.textPrimary, fontSize: 15),
+                      style: TextStyle(color: AppTheme.txtPrimary(context), fontSize: 15),
                       decoration: InputDecoration(
                         hintText: 'Search files...',
-                        hintStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.25)),
-                        prefixIcon: Icon(Icons.search_rounded,
-                            color: Colors.white.withValues(alpha: 0.3)),
+                        hintStyle: TextStyle(color: AppTheme.subtleText(context)),
+                        prefixIcon: Icon(Icons.search_rounded, color: AppTheme.subtleText(context)),
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.06),
+                        fillColor: AppTheme.surf(context).withValues(alpha: 0.6),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
                   )
@@ -261,30 +267,129 @@ class HomePageState extends State<HomePage> {
 
           const SizedBox(height: 16),
 
-          // File count badge
-          if (!_isLoading && _files.isNotEmpty)
+          // Content
+          Expanded(
+            child: _isLoading
+                ? const SkeletonLoader()
+                : _files.isEmpty && _bundles.isEmpty
+                    ? _buildEmptyState()
+                    : _buildContent(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return RefreshIndicator(
+      onRefresh: loadFiles,
+      color: AppTheme.primary,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          // ── Recent Bundles (horizontal scrolling) ──
+          if (_bundles.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Bundles',
+                  style: TextStyle(
+                    color: AppTheme.txtPrimary(context),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  '${_bundles.length} bundles',
+                  style: TextStyle(color: AppTheme.subtleText(context), fontSize: 12),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 110,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _bundles.length,
+                itemBuilder: (ctx, i) {
+                  final bundle = _bundles[i];
+                  final isImage = bundle.filePaths.isNotEmpty &&
+                      (bundle.filePaths.first.endsWith('.png') || bundle.filePaths.first.endsWith('.jpg'));
+
+                  return GestureDetector(
+                    onTap: () => _openBundle(bundle),
+                    child: Container(
+                      width: 160,
+                      margin: const EdgeInsets.only(right: 12),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surf(context),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                isImage ? Icons.photo_library_rounded : Icons.folder_rounded,
+                                color: AppTheme.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  '${bundle.fileCount} items',
+                                  style: TextStyle(color: AppTheme.subtleText(context), fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Text(
+                            bundle.name,
+                            style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600, fontSize: 13),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            bundle.formattedSize,
+                            style: TextStyle(color: AppTheme.subtleText(context), fontSize: 10),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // ── File count badge ──
+          if (_files.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
                 '${_filteredFiles.length} document${_filteredFiles.length != 1 ? 's' : ''}',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppTheme.subtleText(context),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
 
-          // Content
-          Expanded(
-            child: _isLoading
-                ? const SkeletonLoader()
-                : _files.isEmpty
-                    ? _buildEmptyState()
-                    : _filteredFiles.isEmpty
-                        ? _buildNoResults()
-                        : _buildFileList(),
-          ),
+          // ── File list ──
+          if (_filteredFiles.isEmpty && _searchQuery.isNotEmpty)
+            _buildNoResults()
+          else
+            ..._filteredFiles.map((file) => _buildFileItem(file)),
+
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -292,20 +397,19 @@ class HomePageState extends State<HomePage> {
 
   Widget _buildNoResults() {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.search_off_rounded,
-              size: 48, color: Colors.white.withValues(alpha: 0.15)),
-          const SizedBox(height: 16),
-          Text(
-            'No files matching "$_searchQuery"',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
-              fontSize: 14,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 60),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.search_off_rounded, size: 48, color: AppTheme.subtleText(context)),
+            const SizedBox(height: 16),
+            Text(
+              'No files matching "$_searchQuery"',
+              style: TextStyle(color: AppTheme.subtleText(context), fontSize: 14),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -315,7 +419,6 @@ class HomePageState extends State<HomePage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Document icon with "?"
           Container(
             width: 110,
             height: 110,
@@ -326,46 +429,30 @@ class HomePageState extends State<HomePage> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(
-                  Icons.insert_drive_file_outlined,
-                  size: 52,
-                  color: AppTheme.primary.withValues(alpha: 0.6),
-                ),
+                Icon(Icons.insert_drive_file_outlined, size: 52, color: AppTheme.primary.withValues(alpha: 0.6)),
                 Positioned(
                   bottom: 20,
                   right: 24,
                   child: Container(
                     width: 24,
                     height: 24,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.question_mark_rounded,
-                        size: 14, color: Colors.white),
+                    decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle),
+                    child: Icon(Icons.question_mark_rounded, size: 14, color: Colors.white),
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'No Files Yet',
-            style: TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(color: AppTheme.txtPrimary(context), fontSize: 22, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(
             "You don't have any files here. Use the scanner\nor tools to create or import files – they'll\nshow up once added.",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.45),
-              fontSize: 14,
-              height: 1.5,
-            ),
+            style: TextStyle(color: AppTheme.subtleText(context), fontSize: 14, height: 1.5),
           ),
           const SizedBox(height: 32),
           SizedBox(
@@ -376,16 +463,11 @@ class HomePageState extends State<HomePage> {
                 backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 6,
                 shadowColor: AppTheme.primary.withValues(alpha: 0.3),
               ),
-              child: const Text(
-                'Import Files',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
+              child: Text('Import Files', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             ),
           ),
         ],
@@ -393,182 +475,138 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildFileList() {
-    final files = _filteredFiles;
-    return RefreshIndicator(
-      onRefresh: loadFiles,
-      color: AppTheme.primary,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: files.length,
-        itemBuilder: (context, index) {
-          final file = files[index];
-          return Dismissible(
-            key: ValueKey(file.id),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 20),
+  Widget _buildFileItem(PdfFileModel file) {
+    return Dismissible(
+      key: ValueKey(file.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Icon(Icons.delete_rounded, color: Colors.redAccent),
+      ),
+      confirmDismiss: (_) async {
+        return await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                backgroundColor: AppTheme.surf(context),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                title: Text('Delete File', style: TextStyle(color: AppTheme.txtPrimary(context))),
+                content: Text('Delete "${file.name}"?', style: TextStyle(color: AppTheme.subtleText(context))),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel')),
+                  TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Delete', style: TextStyle(color: Colors.redAccent))),
+                ],
+              ),
+            ) ??
+            false;
+      },
+      onDismissed: (_) {
+        _fileService.deleteDocument(file.path);
+        setState(() => _files.removeWhere((f) => f.id == file.id));
+      },
+      child: GestureDetector(
+        onTap: () => _openPdf(file),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: AppTheme.surf(context).withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(16),
+            border: const Border(
+              left: BorderSide(color: AppTheme.primary, width: 4),
+            ),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            leading: Container(
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: Colors.redAccent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(16),
+                color: AppTheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child:
-                  const Icon(Icons.delete_rounded, color: Colors.redAccent),
+              child: Icon(Icons.picture_as_pdf_rounded, color: AppTheme.primary, size: 24),
             ),
-            confirmDismiss: (_) async {
-              return await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      backgroundColor: AppTheme.surface,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      title: const Text('Delete File',
-                          style: TextStyle(color: AppTheme.textPrimary)),
-                      content: Text('Delete "${file.name}"?',
-                          style:
-                              const TextStyle(color: AppTheme.textSecondary)),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx, true),
-                          child: const Text('Delete',
-                              style: TextStyle(color: Colors.redAccent)),
-                        ),
-                      ],
-                    ),
-                  ) ??
-                  false;
-            },
-            onDismissed: (_) {
-              _fileService.deleteDocument(file.path);
-              setState(() => _files.removeWhere((f) => f.id == file.id));
-            },
-            child: GestureDetector(
-              onTap: () => _openPdf(file),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(16),
-                  border: const Border(
-                    left: BorderSide(color: AppTheme.primary, width: 4),
-                  ),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
-                  leading: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.picture_as_pdf_rounded,
-                        color: AppTheme.primary, size: 24),
-                  ),
-                  title: Text(
-                    file.name,
-                    style: const TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    '${file.formattedSize} · ${_formatDate(file.createdAt)}',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4),
-                      fontSize: 12,
-                    ),
-                  ),
-                  trailing: PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert_rounded,
-                        color: Colors.white.withValues(alpha: 0.3)),
-                    color: AppTheme.surface,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    onSelected: (action) {
-                      switch (action) {
-                        case 'open':
-                          _openPdf(file);
-                          break;
-                        case 'share':
-                          _shareFile(file);
-                          break;
-                        case 'rename':
-                          _renameFile(file);
-                          break;
-                        case 'delete':
-                          _deleteFile(file);
-                          break;
-                      }
-                    },
-                    itemBuilder: (ctx) => [
-                      const PopupMenuItem(
-                        value: 'open',
-                        child: Row(
-                          children: [
-                            Icon(Icons.visibility_rounded,
-                                color: AppTheme.primary, size: 20),
-                            SizedBox(width: 8),
-                            Text('Open',
-                                style:
-                                    TextStyle(color: AppTheme.textPrimary)),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'share',
-                        child: Row(
-                          children: [
-                            Icon(Icons.share_rounded,
-                                color: AppTheme.textPrimary, size: 20),
-                            SizedBox(width: 8),
-                            Text('Share',
-                                style:
-                                    TextStyle(color: AppTheme.textPrimary)),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'rename',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit_rounded,
-                                color: AppTheme.textPrimary, size: 20),
-                            SizedBox(width: 8),
-                            Text('Rename',
-                                style:
-                                    TextStyle(color: AppTheme.textPrimary)),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete_outline,
-                                color: Colors.redAccent, size: 20),
-                            SizedBox(width: 8),
-                            Text('Delete',
-                                style:
-                                    TextStyle(color: AppTheme.textPrimary)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            title: Text(
+              file.name,
+              style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600, fontSize: 15),
+              overflow: TextOverflow.ellipsis,
             ),
-          );
-        },
+            subtitle: Text(
+              '${file.formattedSize} · ${_formatDate(file.createdAt)}',
+              style: TextStyle(color: AppTheme.subtleText(context), fontSize: 12),
+            ),
+            trailing: PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert_rounded, color: AppTheme.subtleText(context)),
+              color: AppTheme.surf(context),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              onSelected: (action) {
+                switch (action) {
+                  case 'open':
+                    _openPdf(file);
+                    break;
+                  case 'share':
+                    _shareFile(file);
+                    break;
+                  case 'save':
+                    _saveToDevice(file);
+                    break;
+                  case 'rename':
+                    _renameFile(file);
+                    break;
+                  case 'delete':
+                    _deleteFile(file);
+                    break;
+                }
+              },
+              itemBuilder: (ctx) => [
+                PopupMenuItem(
+                  value: 'open',
+                  child: Row(children: [
+                    Icon(Icons.visibility_rounded, color: AppTheme.primary, size: 20),
+                    const SizedBox(width: 8),
+                    Text('Open', style: TextStyle(color: AppTheme.txtPrimary(context))),
+                  ]),
+                ),
+                PopupMenuItem(
+                  value: 'share',
+                  child: Row(children: [
+                    Icon(Icons.share_rounded, color: AppTheme.txtPrimary(context), size: 20),
+                    const SizedBox(width: 8),
+                    Text('Share', style: TextStyle(color: AppTheme.txtPrimary(context))),
+                  ]),
+                ),
+                PopupMenuItem(
+                  value: 'save',
+                  child: Row(children: [
+                    Icon(Icons.download_rounded, color: AppTheme.primary, size: 20),
+                    const SizedBox(width: 8),
+                    Text('Save to Device', style: TextStyle(color: AppTheme.txtPrimary(context))),
+                  ]),
+                ),
+                PopupMenuItem(
+                  value: 'rename',
+                  child: Row(children: [
+                    Icon(Icons.edit_rounded, color: AppTheme.txtPrimary(context), size: 20),
+                    const SizedBox(width: 8),
+                    Text('Rename', style: TextStyle(color: AppTheme.txtPrimary(context))),
+                  ]),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(children: [
+                    Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                    const SizedBox(width: 8),
+                    Text('Delete', style: TextStyle(color: AppTheme.txtPrimary(context))),
+                  ]),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -584,7 +622,7 @@ class HomePageState extends State<HomePage> {
   }
 }
 
-/// Full-screen PDF viewer with share action.
+/// Full-screen PDF viewer with share + save actions.
 class _PdfViewerScreen extends StatelessWidget {
   final PdfFileModel file;
   const _PdfViewerScreen({required this.file});
@@ -592,30 +630,37 @@ class _PdfViewerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bg(context),
       appBar: AppBar(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: AppTheme.surf(context),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary),
+          icon: Icon(Icons.arrow_back_rounded, color: AppTheme.txtPrimary(context)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           file.name,
-          style: const TextStyle(
-            color: AppTheme.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: AppTheme.txtPrimary(context), fontSize: 16, fontWeight: FontWeight.w600),
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.share_rounded, color: AppTheme.textPrimary),
+            icon: Icon(Icons.download_rounded, color: AppTheme.primary),
+            tooltip: 'Save to Device',
+            onPressed: () async {
+              final result = await SaveService().savePdfToDownloads(file.path);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(result != null ? 'Saved to Downloads!' : 'Save failed'),
+                  backgroundColor: result != null ? AppTheme.primary : Colors.redAccent,
+                ));
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.share_rounded, color: AppTheme.txtPrimary(context)),
             onPressed: () async {
               final xFile = XFile(file.path);
-              await SharePlus.instance.share(
-                ShareParams(files: [xFile]),
-              );
+              await SharePlus.instance.share(ShareParams(files: [xFile]));
             },
           ),
         ],

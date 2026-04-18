@@ -15,15 +15,24 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final navBg = isDark ? AppTheme.surface : AppTheme.lightSurface;
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.06)
+        : Colors.black.withValues(alpha: 0.08);
+    final inactiveColor = isDark
+        ? Colors.white.withValues(alpha: 0.35)
+        : Colors.black.withValues(alpha: 0.4);
+
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: navBg,
         border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.06), width: 1),
+          top: BorderSide(color: borderColor, width: 1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -36,7 +45,7 @@ class BottomNav extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // Nav items row
+              // Nav items row: Home | Tools | [gap] | Settings
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -45,27 +54,25 @@ class BottomNav extends StatelessWidget {
                     label: 'Home',
                     isActive: currentIndex == 0,
                     onTap: () => onTap(0),
+                    inactiveColor: inactiveColor,
                   ),
                   _NavItem(
                     icon: Icons.build_rounded,
                     label: 'Tools',
                     isActive: currentIndex == 1,
                     onTap: () => onTap(1),
+                    inactiveColor: inactiveColor,
                   ),
                   const SizedBox(width: 64), // Space for center FAB
                   _NavItem(
-                    icon: Icons.workspace_premium_rounded,
-                    label: 'PRO',
-                    isActive: currentIndex == 3,
-                    onTap: () => onTap(3),
-                    activeColor: AppTheme.premium,
-                  ),
-                  _NavItem(
                     icon: Icons.settings_rounded,
                     label: 'Settings',
-                    isActive: currentIndex == 4,
-                    onTap: () => onTap(4),
+                    isActive: currentIndex == 2,
+                    onTap: () => onTap(2),
+                    inactiveColor: inactiveColor,
                   ),
+                  // Invisible spacer for symmetry (same width as removed PRO tab)
+                  const SizedBox(width: 56),
                 ],
               ),
 
@@ -84,7 +91,7 @@ class BottomNav extends StatelessWidget {
                         color: AppTheme.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: AppTheme.background,
+                          color: AppTheme.bg(context),
                           width: 4,
                         ),
                         boxShadow: [
@@ -95,7 +102,7 @@ class BottomNav extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.document_scanner_rounded,
                         color: Colors.white,
                         size: 28,
@@ -118,6 +125,7 @@ class _NavItem extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;
   final Color? activeColor;
+  final Color inactiveColor;
 
   const _NavItem({
     required this.icon,
@@ -125,13 +133,14 @@ class _NavItem extends StatelessWidget {
     required this.isActive,
     required this.onTap,
     this.activeColor,
+    required this.inactiveColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final color = isActive
         ? (activeColor ?? AppTheme.primary)
-        : Colors.white.withValues(alpha: 0.35);
+        : inactiveColor;
 
     return GestureDetector(
       onTap: onTap,

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
+import 'services/app_state.dart';
 import 'widgets/bottom_nav.dart';
 import 'widgets/speed_receipt.dart';
 import 'pages/home_page.dart';
 import 'pages/tools_page.dart';
 import 'pages/settings_page.dart';
-import 'pages/premium_page.dart';
 import 'pages/scanner_page.dart';
 import 'pages/merge_page.dart';
 import 'pages/organize/split_page.dart';
@@ -21,22 +24,34 @@ import 'pages/extract_optimize/extract_images_page.dart';
 import 'pages/extract_optimize/extract_text_page.dart';
 import 'pages/extract_optimize/compress_page.dart';
 import 'pages/security/security_page.dart';
+import 'pages/security/sign_pdf_page.dart';
+import 'pages/security/watermark_page.dart';
+import 'pages/security/protect_pdf_page.dart';
+import 'pages/security/unprotect_pdf_page.dart';
 import 'services/file_service.dart';
 
 /// Global PRO status flag.
-/// Flip to `true` to unlock all PRO features instantly for demo.
-/// In production, this would be backed by SharedPreferences or a purchase API.
-bool isPro = false;
+/// Hardcoded to `true` to unlock all PRO features for testing.
+bool isPro = true;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  final appState = AppState();
+  await appState.init();
+
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
     systemNavigationBarColor: AppTheme.surface,
   ));
-  runApp(const OqbaApp());
+  runApp(
+    ChangeNotifierProvider.value(
+      value: appState,
+      child: const OqbaApp(),
+    ),
+  );
 }
 
 class OqbaApp extends StatelessWidget {
@@ -44,15 +59,23 @@ class OqbaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
     return MaterialApp(
       title: 'Oqba',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
-      theme: ThemeData.light(),
+      themeMode: appState.themeMode,
+      theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
+      locale: appState.locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const OqbaShell(),
       routes: {
-        '/premium': (_) => const PremiumPage(),
         '/organize/split': (_) => const SplitPage(),
         '/organize/extract-pages': (_) => const ExtractPagesPage(),
         '/organize/reorder': (_) => const ReorderPagesPage(),
@@ -65,6 +88,10 @@ class OqbaApp extends StatelessWidget {
         '/extract/text': (_) => const ExtractTextPage(),
         '/extract/compress': (_) => const CompressPage(),
         '/security': (_) => const SecurityPage(),
+        '/security/sign': (_) => const SignPdfPage(),
+        '/security/watermark': (_) => const WatermarkPage(),
+        '/security/protect': (_) => const ProtectPdfPage(),
+        '/security/unprotect': (_) => const UnprotectPdfPage(),
       },
     );
   }
@@ -89,14 +116,6 @@ class _OqbaShellState extends State<OqbaShell> {
   }
 
   void _onNavTap(int index) {
-    if (index == 3) {
-      // PRO tab → push premium as full screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const PremiumPage()),
-      );
-      return;
-    }
     setState(() => _currentIndex = index);
   }
 
@@ -144,20 +163,15 @@ class _OqbaShellState extends State<OqbaShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bg(context),
       body: SafeArea(
         bottom: false,
         child: IndexedStack(
-          index: _currentIndex > 2 ? 2 : _currentIndex,
+          index: _currentIndex,
           children: [
             HomePage(key: _homeKey),
             ToolsPage(onMergeTap: _onMergeTap),
-            SettingsPage(onPremiumTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PremiumPage()),
-              );
-            }),
+            const SettingsPage(),
           ],
         ),
       ),

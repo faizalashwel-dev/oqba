@@ -29,19 +29,19 @@ class ToolsPage extends StatelessWidget {
       child: Column(
         children: [
           // Header
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Spacer(),
+              const Spacer(),
               Text(
                 'Oqba PDF Tools Suite',
                 style: TextStyle(
-                  color: AppTheme.textPrimary,
+                  color: AppTheme.txtPrimary(context),
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
             ],
           ),
           const SizedBox(height: 4),
@@ -131,7 +131,6 @@ class ToolsPage extends StatelessWidget {
                   icon: Icons.text_snippet_rounded,
                   title: 'Images to Text (OCR)',
                   description: 'Extract text from images using on-device AI.',
-                  isPro: true,
                   fullWidth: true,
                   onTap: () => _push(context, const OcrPage()),
                 ),
@@ -162,7 +161,6 @@ class ToolsPage extends StatelessWidget {
                   icon: Icons.compress_rounded,
                   title: 'Compress PDF',
                   description: 'Reduce file size while keeping quality.',
-                  isPro: true,
                   fullWidth: true,
                   onTap: () => _push(context, const CompressPage()),
                 ),
@@ -176,8 +174,7 @@ class ToolsPage extends StatelessWidget {
                 _ToolCard(
                   icon: Icons.lock_outline_rounded,
                   title: 'PDF Security',
-                  description: 'Password protect, remove passwords, watermarks.',
-                  isComingSoon: true,
+                  description: 'Sign, watermark, protect & unlock PDFs.',
                   fullWidth: true,
                   onTap: () => _push(context, const SecurityPage()),
                 ),
@@ -200,7 +197,7 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         color: AppTheme.primary,
         fontWeight: FontWeight.w700,
         fontSize: 17,
@@ -213,8 +210,6 @@ class _ToolCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String description;
-  final bool isPro;
-  final bool isComingSoon;
   final bool fullWidth;
   final VoidCallback? onTap;
 
@@ -222,8 +217,6 @@ class _ToolCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.description,
-    this.isPro = false,
-    this.isComingSoon = false,
     this.fullWidth = false,
     this.onTap,
   });
@@ -232,132 +225,52 @@ class _ToolCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: isComingSoon ? 0.6 : 1.0,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isComingSoon
-                  ? Colors.white.withValues(alpha: 0.06)
-                  : AppTheme.primary.withValues(alpha: 0.15),
-              width: 1,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppTheme.surf(context).withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: AppTheme.primary.withValues(alpha: 0.15),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: AppTheme.primary,
+                size: 22,
+              ),
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Icon with optional PRO crown overlay
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: isComingSoon
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : AppTheme.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          icon,
-                          color: isComingSoon
-                              ? Colors.white.withValues(alpha: 0.3)
-                              : AppTheme.primary,
-                          size: 22,
-                        ),
-                      ),
-                      // Amber crown overlay for PRO tools
-                      if (isPro)
-                        Positioned(
-                          top: -6,
-                          right: -6,
-                          child: Container(
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              color: AppTheme.premium,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppTheme.background,
-                                width: 1.5,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.workspace_premium,
-                              color: Colors.white,
-                              size: 10,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  if (isPro)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppTheme.premium,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'PRO',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  if (isComingSoon && !isPro)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'Soon',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.35),
-                          fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                ],
+            const SizedBox(height: 14),
+            Text(
+              title,
+              style: TextStyle(
+                color: AppTheme.txtPrimary(context),
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
               ),
-              const SizedBox(height: 14),
-              Text(
-                title,
-                style: TextStyle(
-                  color: isComingSoon
-                      ? Colors.white.withValues(alpha: 0.5)
-                      : AppTheme.textPrimary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              description,
+              style: TextStyle(
+                color: AppTheme.subtleText(context),
+                fontSize: 11,
+                height: 1.3,
               ),
-              const SizedBox(height: 3),
-              Text(
-                description,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: isComingSoon ? 0.25 : 0.4),
-                  fontSize: 11,
-                  height: 1.3,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );

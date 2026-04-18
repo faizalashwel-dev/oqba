@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   google_mlkit_document_scanner: ^0.4.1
   syncfusion_flutter_pdf: ^28.1.33
   syncfusion_flutter_pdfviewer: ^28.1.33
@@ -21,6 +23,10 @@ dependencies:
   google_mlkit_text_recognition: ^0.13.0
   flutter_image_compress: ^2.1.0
   image_picker: ^1.1.0
+  shared_preferences: ^2.2.2
+  gal: ^2.3.0
+  intl: ^0.20.2
+  provider: ^6.1.1
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +35,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/icon.png

@@ -38,6 +38,15 @@ class PdfService {
     return docDir.path;
   }
 
+  Future<String> _getTempDir() async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final tempDir = Directory('${appDir.path}/Oqba/temp');
+    if (!await tempDir.exists()) {
+      await tempDir.create(recursive: true);
+    }
+    return tempDir.path;
+  }
+
   /// Convert list of image paths into a single PDF.
   /// Runs in Isolate via compute() to keep UI at 60fps.
   /// Returns [PdfProcessingResult] with path, elapsed ms, and file size.
@@ -224,6 +233,22 @@ class PdfService {
     String outputName,
   ) async {
     final outputDir = await _getOqbaDir();
+    return compute(_splitPdfIsolate, {
+      'pdfPath': pdfPath,
+      'ranges': ranges,
+      'outputDir': outputDir,
+      'outputName': outputName,
+    });
+  }
+
+  /// Splits a PDF and saves the chunks into AppDocuments/Oqba/temp/
+  /// Returns a list of paths to the generated temporary chunks.
+  Future<List<String>> splitPdfTemp(
+    String pdfPath,
+    List<List<int>> ranges,
+    String outputName,
+  ) async {
+    final outputDir = await _getTempDir();
     return compute(_splitPdfIsolate, {
       'pdfPath': pdfPath,
       'ranges': ranges,

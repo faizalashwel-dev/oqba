@@ -115,7 +115,7 @@ class _MergePageState extends State<MergePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bg(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -126,15 +126,15 @@ class _MergePageState extends State<MergePage> {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.chevron_left_rounded,
-                        color: AppTheme.textPrimary, size: 30),
+                    child: Icon(Icons.chevron_left_rounded,
+                        color: AppTheme.txtPrimary(context), size: 30),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Oqba Merge PDF Tool',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: AppTheme.textPrimary,
+                        color: AppTheme.txtPrimary(context),
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                       ),
@@ -174,7 +174,7 @@ class _MergePageState extends State<MergePage> {
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.add_circle_outline_rounded,
@@ -204,13 +204,13 @@ class _MergePageState extends State<MergePage> {
                                   Icon(
                                     Icons.merge_rounded,
                                     size: 48,
-                                    color: Colors.white.withValues(alpha: 0.15),
+                                    color: AppTheme.subtleText(context).withValues(alpha: 0.3),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'Tap "Add Files" to select PDFs to merge',
                                     style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.3),
+                                      color: AppTheme.subtleText(context),
                                       fontSize: 14,
                                     ),
                                   ),
@@ -233,7 +233,7 @@ class _MergePageState extends State<MergePage> {
                                   key: ValueKey('${file.path}_$index'),
                                   margin: const EdgeInsets.only(bottom: 10),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.06),
+                                    color: AppTheme.surf(context).withValues(alpha: 0.8),
                                     borderRadius: BorderRadius.circular(18),
                                     border: const Border(
                                       left: BorderSide(
@@ -256,7 +256,7 @@ class _MergePageState extends State<MergePage> {
                                       child: Center(
                                         child: Text(
                                           '${index + 1}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: AppTheme.primary,
                                             fontWeight: FontWeight.w800,
                                             fontSize: 16,
@@ -266,8 +266,8 @@ class _MergePageState extends State<MergePage> {
                                     ),
                                     title: Text(
                                       file.name,
-                                      style: const TextStyle(
-                                        color: AppTheme.textPrimary,
+                                      style: TextStyle(
+                                        color: AppTheme.txtPrimary(context),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15,
                                       ),
@@ -276,7 +276,7 @@ class _MergePageState extends State<MergePage> {
                                     subtitle: Text(
                                       file.size,
                                       style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.35),
+                                        color: AppTheme.subtleText(context),
                                         fontSize: 12,
                                       ),
                                     ),
@@ -287,14 +287,13 @@ class _MergePageState extends State<MergePage> {
                                           onTap: () => _removeFile(index),
                                           child: Icon(
                                               Icons.close_rounded,
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.25),
+                                              color: AppTheme.subtleText(context),
                                               size: 20),
                                         ),
                                         const SizedBox(width: 8),
                                         Icon(Icons.drag_handle_rounded,
                                             color:
-                                                Colors.white.withValues(alpha: 0.2)),
+                                                AppTheme.subtleText(context)),
                                       ],
                                     ),
                                   ),
@@ -338,7 +337,7 @@ class _MergePageState extends State<MergePage> {
                     ),
                     child: Center(
                       child: _isMerging
-                          ? const Row(
+                          ? Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 SizedBox(
@@ -362,7 +361,7 @@ class _MergePageState extends State<MergePage> {
                             )
                           : Text(
                               'Merge ${_selectedFiles.length} Files',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,

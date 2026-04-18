@@ -53,21 +53,21 @@ class _ImagesToPdfPageState extends State<ImagesToPdfPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(title: const Text('Images to PDF', style: TextStyle(fontWeight: FontWeight.w700)), actions: const [OfflineIndicator(), SizedBox(width: 12)]),
+      backgroundColor: AppTheme.bg(context),
+      appBar: AppBar(title: Text('Images to PDF', style: TextStyle(fontWeight: FontWeight.w700)), actions: const [OfflineIndicator(), SizedBox(width: 12)]),
       body: SafeArea(child: Column(children: [
         // Add images button
         Padding(padding: const EdgeInsets.all(16), child: GestureDetector(onTap: _isProcessing ? null : _addImages, child: Container(
           width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(gradient: LinearGradient(colors: [AppTheme.primary, AppTheme.primary.withGreen(200)]), borderRadius: BorderRadius.circular(16)),
-          child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add_photo_alternate, color: Colors.white), SizedBox(width: 8), Text('Add Images', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700))]),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add_photo_alternate, color: Colors.white), SizedBox(width: 8), Text('Add Images', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700))]),
         ))),
         if (_images.length > 50)
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.orangeAccent.withAlpha(30), borderRadius: BorderRadius.circular(8)),
-            child: const Text('Large number of images may take longer', style: TextStyle(color: Colors.orangeAccent, fontSize: 12)))),
+            child: Text('Large number of images may take longer', style: TextStyle(color: Colors.orangeAccent, fontSize: 12)))),
         // Image list
         Expanded(child: _images.isEmpty
-            ? Center(child: Text('Tap "Add Images" to select photos', style: TextStyle(color: AppTheme.textSecondary.withAlpha(120))))
+            ? Center(child: Text('Tap "Add Images" to select photos', style: TextStyle(color: AppTheme.txtSecondary(context).withAlpha(120))))
             : ReorderableListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: _images.length,
@@ -75,28 +75,28 @@ class _ImagesToPdfPageState extends State<ImagesToPdfPage> {
                 itemBuilder: (ctx, i) => Container(
                   key: ValueKey('img_${_images[i].path}_$i'),
                   margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
                     leading: ClipRRect(borderRadius: BorderRadius.circular(6), child: Image.file(File(_images[i].path), width: 50, height: 50, fit: BoxFit.cover)),
-                    title: Text(_images[i].name, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13), overflow: TextOverflow.ellipsis),
+                    title: Text(_images[i].name, style: TextStyle(color: AppTheme.txtPrimary(context), fontSize: 13), overflow: TextOverflow.ellipsis),
                     trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                      GestureDetector(onTap: () => setState(() => _images.removeAt(i)), child: const Icon(Icons.close, color: AppTheme.textSecondary, size: 18)),
-                      const SizedBox(width: 8), const Icon(Icons.drag_handle, color: AppTheme.textSecondary),
+                      GestureDetector(onTap: () => setState(() => _images.removeAt(i)), child: Icon(Icons.drag_indicator_rounded, color: AppTheme.txtSecondary(context), size: 18)),
+                      const SizedBox(width: 8), Icon(Icons.drag_indicator_rounded, color: AppTheme.txtSecondary(context)),
                     ]),
                   ),
                 ),
               )),
         // PDF name + create button
         Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 8), child: TextField(
-          controller: _nameController, style: const TextStyle(color: AppTheme.textPrimary),
-          decoration: InputDecoration(hintText: 'PDF filename', hintStyle: TextStyle(color: AppTheme.textSecondary.withAlpha(120)), filled: true, fillColor: AppTheme.surface, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none), prefixIcon: const Icon(Icons.edit, color: AppTheme.primary)),
+          controller: _nameController, style: TextStyle(color: AppTheme.txtPrimary(context)),
+          decoration: InputDecoration(hintText: 'PDF filename', hintStyle: TextStyle(color: AppTheme.txtSecondary(context).withAlpha(120)), filled: true, fillColor: AppTheme.surf(context), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none), prefixIcon: Icon(Icons.edit, color: AppTheme.primary)),
         )),
         Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 24), child: SizedBox(width: double.infinity, height: 56, child: ElevatedButton(
           onPressed: _images.isEmpty || _isProcessing ? null : _create,
-          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, disabledBackgroundColor: AppTheme.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, disabledBackgroundColor: AppTheme.surf(context), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
           child: _isProcessing
               ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
-              : Text('Create PDF (${_images.length} images)', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+              : Text('Create PDF (${_images.length} images)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
         ))),
       ])),
     );

@@ -42,13 +42,13 @@ class ProGate extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
               child: Container(
-                color: AppTheme.background.withAlpha(128),
+                color: AppTheme.bg(context).withAlpha(128),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Crown icon
-                      const Icon(
+                      Icon(
                         Icons.workspace_premium,
                         color: AppTheme.premium,
                         size: 64,
@@ -65,7 +65,7 @@ class ProGate extends StatelessWidget {
                               color: AppTheme.premium.withAlpha(64)),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'PRO FEATURE',
                           style: TextStyle(
                             color: AppTheme.premium,
@@ -82,8 +82,8 @@ class ProGate extends StatelessWidget {
                       Text(
                         featureName,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AppTheme.textPrimary,
+                        style: TextStyle(
+                          color: AppTheme.txtPrimary(context),
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
                         ),
@@ -97,7 +97,7 @@ class ProGate extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.premium,
-                          foregroundColor: AppTheme.background,
+                          foregroundColor: AppTheme.bg(context),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 32, vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -105,7 +105,7 @@ class ProGate extends StatelessWidget {
                           ),
                           elevation: 4,
                         ),
-                        child: const Text(
+                        child: Text(
                           'Upgrade to PRO',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,

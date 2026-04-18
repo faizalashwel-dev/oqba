@@ -94,12 +94,12 @@ class PageSelectorGridState extends State<PageSelectorGrid> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: AppTheme.surf(context),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: isSelected
                     ? AppTheme.primary
-                    : AppTheme.surface.withAlpha(80),
+                    : AppTheme.surf(context).withAlpha(80),
                 width: isSelected ? 2.0 : 1.0,
               ),
               boxShadow: isSelected
@@ -129,13 +129,13 @@ class PageSelectorGridState extends State<PageSelectorGrid> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppTheme.background.withAlpha(200),
+                      color: AppTheme.bg(context).withAlpha(200),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '${index + 1}',
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
+                      style: TextStyle(
+                        color: AppTheme.txtPrimary(context),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'monospace',
@@ -158,8 +158,8 @@ class PageSelectorGridState extends State<PageSelectorGrid> {
                       ),
                       child: Text(
                         '$rotation°',
-                        style: const TextStyle(
-                          color: AppTheme.background,
+                        style: TextStyle(
+                          color: AppTheme.bg(context),
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
                         ),
@@ -178,7 +178,7 @@ class PageSelectorGridState extends State<PageSelectorGrid> {
                         shape: BoxShape.circle,
                       ),
                       padding: const EdgeInsets.all(3),
-                      child: const Icon(
+                      child: Icon(
                         Icons.check,
                         size: 14,
                         color: Colors.white,
@@ -208,19 +208,19 @@ class PageSelectorGridState extends State<PageSelectorGrid> {
             !snapshot.hasData ||
             snapshot.data == null) {
           return Container(
-            color: AppTheme.surface,
+            color: AppTheme.surf(context),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.insert_drive_file_outlined,
-                      color: AppTheme.textSecondary.withAlpha(100),
+                      color: AppTheme.txtSecondary(context).withAlpha(100),
                       size: 28),
                   const SizedBox(height: 4),
                   Text(
                     'Page ${index + 1}',
                     style: TextStyle(
-                      color: AppTheme.textSecondary.withAlpha(150),
+                      color: AppTheme.txtSecondary(context).withAlpha(150),
                       fontSize: 11,
                     ),
                   ),
@@ -291,7 +291,7 @@ class _SkeletonThumbnailState extends State<_SkeletonThumbnail>
             child: Text(
               '${widget.pageNumber}',
               style: TextStyle(
-                color: AppTheme.textSecondary.withAlpha(80),
+                color: AppTheme.txtSecondary(context).withAlpha(80),
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),

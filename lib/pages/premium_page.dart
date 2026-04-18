@@ -7,7 +7,7 @@ class PremiumPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bg(context),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -23,8 +23,8 @@ class PremiumPage extends StatelessWidget {
                         onTap: () => Navigator.pop(context),
                         child: Row(
                           children: [
-                            const Icon(Icons.chevron_left_rounded,
-                                color: AppTheme.textPrimary, size: 28),
+                            Icon(Icons.chevron_left_rounded,
+                                color: AppTheme.txtPrimary(context), size: 28),
                             const SizedBox(width: 4),
                             Text(
                               'Back',
@@ -37,12 +37,12 @@ class PremiumPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Oqba Premium Upgrade',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: AppTheme.textPrimary,
+                            color: AppTheme.txtPrimary(context),
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
                           ),
@@ -84,14 +84,14 @@ class PremiumPage extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.workspace_premium_rounded,
                           color: AppTheme.premium,
                           size: 44,
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Oqba Premium',
                         style: TextStyle(
                           color: Colors.white,
@@ -128,16 +128,16 @@ class PremiumPage extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            const Text(
+                            Text(
                               'Monthly',
                               style: TextStyle(
-                                color: AppTheme.textPrimary,
+                                color: AppTheme.txtPrimary(context),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
+                            Text(
                               '\$4.99/mo',
                               style: TextStyle(
                                 color: AppTheme.primary,
@@ -166,16 +166,16 @@ class PremiumPage extends StatelessWidget {
                             ),
                             child: Column(
                               children: [
-                                const Text(
+                                Text(
                                   'Yearly',
                                   style: TextStyle(
-                                    color: AppTheme.textPrimary,
+                                    color: AppTheme.txtPrimary(context),
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                const Text(
+                                Text(
                                   '\$39.99/yr',
                                   style: TextStyle(
                                     color: AppTheme.primary,
@@ -196,7 +196,7 @@ class PremiumPage extends StatelessWidget {
                                 color: AppTheme.premium,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Save 33%',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -234,7 +234,7 @@ class PremiumPage extends StatelessWidget {
                       elevation: 10,
                       shadowColor: AppTheme.primary.withValues(alpha: 0.4),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Subscribe Now',
                       style: TextStyle(
                         fontSize: 20,
@@ -262,7 +262,7 @@ class _FeatureItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.check_circle_rounded,
+        Icon(Icons.check_circle_rounded,
             color: AppTheme.primary, size: 22),
         const SizedBox(width: 12),
         Expanded(

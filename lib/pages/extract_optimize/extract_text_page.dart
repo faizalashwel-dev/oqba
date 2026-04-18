@@ -64,8 +64,8 @@ class _ExtractTextPageState extends State<ExtractTextPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(title: const Text('Extract Text', style: TextStyle(fontWeight: FontWeight.w700)), actions: const [OfflineIndicator(), SizedBox(width: 12)]),
+      backgroundColor: AppTheme.bg(context),
+      appBar: AppBar(title: Text('Extract Text', style: TextStyle(fontWeight: FontWeight.w700)), actions: const [OfflineIndicator(), SizedBox(width: 12)]),
       body: SafeArea(child: Padding(padding: const EdgeInsets.all(20), child: _extractedText != null ? _buildResult() : _buildForm())),
     );
   }
@@ -74,19 +74,19 @@ class _ExtractTextPageState extends State<ExtractTextPage> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       GestureDetector(onTap: _isProcessing ? null : _pickFile, child: Container(
         width: double.infinity, padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppTheme.primary.withAlpha(60))),
+        decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(16), border: Border.all(color: AppTheme.primary.withAlpha(60))),
         child: _pdfPath == null
-            ? const Column(children: [Icon(Icons.upload_file_rounded, color: AppTheme.primary, size: 40), SizedBox(height: 8), Text('Select PDF', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600))])
-            : Row(children: [const Icon(Icons.picture_as_pdf, color: AppTheme.primary, size: 32), const SizedBox(width: 12),
-                Expanded(child: Text(_pdfName ?? '', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis))]),
+            ? Column(children: [Icon(Icons.upload_file_rounded, color: AppTheme.primary, size: 40), SizedBox(height: 8), Text('Select PDF', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600))])
+            : Row(children: [Icon(Icons.picture_as_pdf, color: AppTheme.primary, size: 32), const SizedBox(width: 12),
+                Expanded(child: Text(_pdfName ?? '', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis))]),
       )),
       const Spacer(),
       if (_pdfPath != null) SizedBox(width: double.infinity, height: 56, child: ElevatedButton(
         onPressed: _isProcessing ? null : _extract,
         style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
         child: _isProcessing
-            ? const Row(mainAxisSize: MainAxisSize.min, children: [SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white)), SizedBox(width: 12), Text('Extracting text...', style: TextStyle(color: Colors.white))])
-            : const Text('Extract Text', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+            ? Row(mainAxisSize: MainAxisSize.min, children: [SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white)), SizedBox(width: 12), Text('Extracting text...', style: TextStyle(color: Colors.white))])
+            : Text('Extract Text', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
       )),
     ]);
   }
@@ -99,7 +99,7 @@ class _ExtractTextPageState extends State<ExtractTextPage> {
 
     return Column(children: [
       // Stats row
-      Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12)),
+      Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(12)),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           _stat('$wordCount', 'words'), _stat('$charCount', 'chars'), _stat('$pageCount', 'pages'),
         ])),
@@ -107,31 +107,31 @@ class _ExtractTextPageState extends State<ExtractTextPage> {
       // Low text warning
       if (text.trim().length < 50 && pageCount > 1) ...[
         Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.orangeAccent.withAlpha(30), borderRadius: BorderRadius.circular(8)),
-          child: Row(children: [const Icon(Icons.info_outline, color: Colors.orangeAccent, size: 18), const SizedBox(width: 8),
-            const Expanded(child: Text('Limited text found. This may be a scanned PDF.', style: TextStyle(color: Colors.orangeAccent, fontSize: 12))),
-            TextButton(onPressed: () => Navigator.pushReplacementNamed(context, '/convert/ocr'), child: const Text('Try OCR', style: TextStyle(color: AppTheme.primary, fontSize: 12))),
+          child: Row(children: [Icon(Icons.info_outline, color: Colors.orangeAccent, size: 18), const SizedBox(width: 8),
+            Expanded(child: Text('Limited text found. This may be a scanned PDF.', style: TextStyle(color: Colors.orangeAccent, fontSize: 12))),
+            TextButton(onPressed: () => Navigator.pushReplacementNamed(context, '/convert/ocr'), child: Text('Try OCR', style: TextStyle(color: AppTheme.primary, fontSize: 12))),
           ])),
         const SizedBox(height: 12),
       ],
       // Text display
       Expanded(child: Container(
-        width: double.infinity, padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12)),
-        child: SelectableText(text, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13, height: 1.6)),
+        width: double.infinity, padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(12)),
+        child: SelectableText(text, style: TextStyle(color: AppTheme.txtPrimary(context), fontSize: 13, height: 1.6)),
       )),
       const SizedBox(height: 12),
       // Action buttons
       Row(children: [
         Expanded(child: OutlinedButton.icon(onPressed: () { Clipboard.setData(ClipboardData(text: text)); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied!'))); },
-          icon: const Icon(Icons.copy), label: const Text('Copy All'), style: OutlinedButton.styleFrom(foregroundColor: AppTheme.primary, side: const BorderSide(color: AppTheme.primary)))),
+          icon: Icon(Icons.copy), label: Text('Copy All'), style: OutlinedButton.styleFrom(foregroundColor: AppTheme.primary, side: const BorderSide(color: AppTheme.primary)))),
         const SizedBox(width: 12),
-        Expanded(child: ElevatedButton.icon(onPressed: _exportTxt, icon: const Icon(Icons.save_alt, color: Colors.white), label: const Text('Export .txt', style: TextStyle(color: Colors.white)),
+        Expanded(child: ElevatedButton.icon(onPressed: _exportTxt, icon: Icon(Icons.save_alt, color: Colors.white), label: Text('Export .txt', style: TextStyle(color: Colors.white)),
           style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary))),
       ]),
     ]);
   }
 
   Widget _stat(String value, String label) => Column(children: [
-    Text(value, style: const TextStyle(color: AppTheme.primary, fontSize: 20, fontWeight: FontWeight.w800)),
-    Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+    Text(value, style: TextStyle(color: AppTheme.primary, fontSize: 20, fontWeight: FontWeight.w800)),
+    Text(label, style: TextStyle(color: AppTheme.txtSecondary(context), fontSize: 11)),
   ]);
 }

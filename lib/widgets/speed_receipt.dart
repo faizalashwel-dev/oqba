@@ -73,7 +73,7 @@ class _SpeedReceiptState extends State<SpeedReceipt>
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppTheme.surface,
+            color: AppTheme.surf(context),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
             boxShadow: [
@@ -92,7 +92,7 @@ class _SpeedReceiptState extends State<SpeedReceipt>
                   color: AppTheme.primary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.check_rounded,
                   color: AppTheme.primary,
                   size: 18,
@@ -106,8 +106,8 @@ class _SpeedReceiptState extends State<SpeedReceipt>
                   children: [
                     Text(
                       '${widget.operation} successfully',
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
+                      style: TextStyle(
+                        color: AppTheme.txtPrimary(context),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),

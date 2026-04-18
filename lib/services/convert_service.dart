@@ -10,7 +10,8 @@ import 'pdf_service.dart';
 
 /// Conversion service: PDF ↔ Images, OCR text extraction.
 ///
-/// - pdfToImages: renders PDF pages to JPEG/PNG via pdfrx (isolate)
+/// - pdfToImages: renders PDF pages to JPEG/PNG via pdfrx (main thread with yields)
+/// - pdfToImagesSelected: converts only specified page indices
 /// - imagesToPdf: thin wrapper around PdfService.imagesToPdf
 /// - extractTextFromImage: on-device OCR via ML Kit (no compute())
 class ConvertService {
@@ -25,19 +26,21 @@ class ConvertService {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // PDF → Images
+  // PDF → Images (All Pages)
   // ═══════════════════════════════════════════════════════════
 
   /// Renders every page of [pdfPath] to an image file.
   ///
   /// [format]     — 'jpg' (default) or 'png'.
   /// [qualityDpi] — Render resolution. 150 = fast, 300 = print-quality.
+  /// [onProgress] — Called with (current, total) for UI progress updates.
   ///
   /// Returns list of output image paths in AppDocuments/Oqba/extracted/.
   Future<List<String>> pdfToImages(
     String pdfPath, {
     String format = 'jpg',
     int qualityDpi = 150,
+    void Function(int current, int total)? onProgress,
   }) async {
     final outputDir = await _getExtractedDir();
     final baseName = _baseName(pdfPath);
@@ -49,6 +52,8 @@ class ConvertService {
 
     try {
       for (int i = 0; i < doc.pages.length; i++) {
+        onProgress?.call(i + 1, doc.pages.length);
+
         final page = doc.pages[i];
         final double scale = qualityDpi / 72.0;
         final double fullWidth = page.width * scale;
@@ -76,8 +81,71 @@ class ConvertService {
         File(outPath).writeAsBytesSync(byteData.buffer.asUint8List());
         outputs.add(outPath);
 
-        // RULE 2: Yield to the event loop between pages to prevent UI freeze
-        // (pdfrx requires Flutter binding — cannot use compute())
+        // Yield to the event loop between pages to prevent UI freeze
+        await Future<void>.delayed(Duration.zero);
+      }
+    } finally {
+      await doc.dispose();
+    }
+
+    return outputs;
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // PDF → Images (Selected Pages Only)
+  // ═══════════════════════════════════════════════════════════
+
+  /// Renders only selected pages to image files.
+  ///
+  /// [pageIndices] — Zero-based page indices to convert.
+  /// [onProgress]  — Called with (current, total) for UI progress updates.
+  Future<List<String>> pdfToImagesSelected(
+    String pdfPath, {
+    required List<int> pageIndices,
+    String format = 'png',
+    int qualityDpi = 150,
+    void Function(int current, int total)? onProgress,
+  }) async {
+    final outputDir = await _getExtractedDir();
+    final baseName = _baseName(pdfPath);
+    final sorted = List<int>.from(pageIndices)..sort();
+
+    final doc = await pdfrx.PdfDocument.openFile(pdfPath);
+    final List<String> outputs = [];
+
+    try {
+      for (int idx = 0; idx < sorted.length; idx++) {
+        final pageIndex = sorted[idx];
+        onProgress?.call(idx + 1, sorted.length);
+
+        if (pageIndex < 0 || pageIndex >= doc.pages.length) continue;
+
+        final page = doc.pages[pageIndex];
+        final double scale = qualityDpi / 72.0;
+        final double fullWidth = page.width * scale;
+        final double fullHeight = page.height * scale;
+
+        final pdfrx.PdfImage? pdfImage = await page.render(
+          fullWidth: fullWidth,
+          fullHeight: fullHeight,
+          backgroundColor: Colors.white,
+        );
+        if (pdfImage == null) continue;
+
+        final ui.Image image = await pdfImage.createImage();
+
+        final ByteData? byteData = await image.toByteData(
+          format: ui.ImageByteFormat.png,
+        );
+        image.dispose();
+        pdfImage.dispose();
+
+        if (byteData == null) continue;
+
+        final outPath = '$outputDir/${baseName}_page${pageIndex + 1}.png';
+        File(outPath).writeAsBytesSync(byteData.buffer.asUint8List());
+        outputs.add(outPath);
+
         await Future<void>.delayed(Duration.zero);
       }
     } finally {

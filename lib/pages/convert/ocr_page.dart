@@ -62,19 +62,19 @@ class _OcrPageState extends State<OcrPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(title: const Text('OCR · Text from Image', style: TextStyle(fontWeight: FontWeight.w700)), actions: const [OfflineIndicator(), SizedBox(width: 12)]),
+      backgroundColor: AppTheme.bg(context),
+      appBar: AppBar(title: Text('OCR · Text from Image', style: TextStyle(fontWeight: FontWeight.w700)), actions: const [OfflineIndicator(), SizedBox(width: 12)]),
       body: ProGate(isPro: isPro, featureName: 'OCR Text Recognition', child: SafeArea(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // Image source buttons
         Row(children: [
           Expanded(child: GestureDetector(onTap: _pickFromGallery, child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16), decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primary.withAlpha(60))),
-            child: const Column(children: [Icon(Icons.photo_library, color: AppTheme.primary, size: 28), SizedBox(height: 4), Text('Gallery', style: TextStyle(color: AppTheme.textPrimary, fontSize: 12))]),
+            padding: const EdgeInsets.symmetric(vertical: 16), decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primary.withAlpha(60))),
+            child: Column(children: [Icon(Icons.photo_library, color: AppTheme.primary, size: 28), SizedBox(height: 4), Text('Gallery', style: TextStyle(color: AppTheme.txtPrimary(context), fontSize: 12))]),
           ))),
           const SizedBox(width: 12),
           Expanded(child: GestureDetector(onTap: _pickFromCamera, child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16), decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primary.withAlpha(60))),
-            child: const Column(children: [Icon(Icons.camera_alt, color: AppTheme.primary, size: 28), SizedBox(height: 4), Text('Camera', style: TextStyle(color: AppTheme.textPrimary, fontSize: 12))]),
+            padding: const EdgeInsets.symmetric(vertical: 16), decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primary.withAlpha(60))),
+            child: Column(children: [Icon(Icons.camera_alt, color: AppTheme.primary, size: 28), SizedBox(height: 4), Text('Camera', style: TextStyle(color: AppTheme.txtPrimary(context), fontSize: 12))]),
           ))),
         ]),
         const SizedBox(height: 16),
@@ -88,22 +88,22 @@ class _OcrPageState extends State<OcrPage> {
             onPressed: _isProcessing ? null : _extractText,
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             child: _isProcessing
-                ? const Row(mainAxisSize: MainAxisSize.min, children: [SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white)), SizedBox(width: 12), Text('Analyzing with on-device AI...', style: TextStyle(color: Colors.white))])
-                : const Text('Extract Text', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                ? Row(mainAxisSize: MainAxisSize.min, children: [SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white)), SizedBox(width: 12), Text('Analyzing with on-device AI...', style: TextStyle(color: Colors.white))])
+                : Text('Extract Text', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
           )),
         if (_hasResult) ...[
           if (_textController.text.isEmpty)
             Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.orangeAccent.withAlpha(30), borderRadius: BorderRadius.circular(12)),
-              child: const Row(children: [Icon(Icons.info_outline, color: Colors.orangeAccent), SizedBox(width: 8), Expanded(child: Text('No text detected. Try a clearer image.', style: TextStyle(color: Colors.orangeAccent, fontSize: 13)))]))
+              child: Row(children: [Icon(Icons.info_outline, color: Colors.orangeAccent), SizedBox(width: 8), Expanded(child: Text('No text detected. Try a clearer image.', style: TextStyle(color: Colors.orangeAccent, fontSize: 13)))]))
           else ...[
-            Expanded(child: TextField(controller: _textController, maxLines: null, expands: true, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
-              decoration: InputDecoration(filled: true, fillColor: AppTheme.surface, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)))),
+            Expanded(child: TextField(controller: _textController, maxLines: null, expands: true, style: TextStyle(color: AppTheme.txtPrimary(context), fontSize: 14),
+              decoration: InputDecoration(filled: true, fillColor: AppTheme.surf(context), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)))),
             const SizedBox(height: 12),
             Row(children: [
               Expanded(child: OutlinedButton.icon(onPressed: () { Clipboard.setData(ClipboardData(text: _textController.text)); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied!'))); },
-                icon: const Icon(Icons.copy), label: const Text('Copy All'), style: OutlinedButton.styleFrom(foregroundColor: AppTheme.primary, side: const BorderSide(color: AppTheme.primary)))),
+                icon: Icon(Icons.copy), label: Text('Copy All'), style: OutlinedButton.styleFrom(foregroundColor: AppTheme.primary, side: const BorderSide(color: AppTheme.primary)))),
               const SizedBox(width: 12),
-              Expanded(child: ElevatedButton.icon(onPressed: _exportTxt, icon: const Icon(Icons.save_alt, color: Colors.white), label: const Text('Export .txt', style: TextStyle(color: Colors.white)),
+              Expanded(child: ElevatedButton.icon(onPressed: _exportTxt, icon: Icon(Icons.save_alt, color: Colors.white), label: Text('Export .txt', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary))),
             ]),
           ],

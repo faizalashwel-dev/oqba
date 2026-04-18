@@ -80,52 +80,52 @@ class _RotatePagesPageState extends State<RotatePagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bg(context),
       appBar: AppBar(
-        title: const Text('Rotate Pages', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text('Rotate Pages', style: TextStyle(fontWeight: FontWeight.w700)),
         actions: [
           if (_pdfPath != null)
-            TextButton(onPressed: _rotateAll, child: const Text('Rotate All', style: TextStyle(color: AppTheme.primary))),
+            TextButton(onPressed: _rotateAll, child: Text('Rotate All', style: TextStyle(color: AppTheme.primary))),
           const OfflineIndicator(), const SizedBox(width: 12),
         ],
       ),
       body: _pdfPath == null
           ? Center(child: GestureDetector(onTap: _pickFile, child: Container(
-              padding: const EdgeInsets.all(40), decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.primary.withAlpha(60))),
-              child: const Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.upload_file_rounded, color: AppTheme.primary, size: 48), SizedBox(height: 12), Text('Select PDF', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600, fontSize: 16))]))))
+              padding: const EdgeInsets.all(40), decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.primary.withAlpha(60))),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.upload_file_rounded, color: AppTheme.primary, size: 48), SizedBox(height: 12), Text('Select PDF', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600, fontSize: 16))]))))
           : Column(children: [
               Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Row(children: [
-                const Icon(Icons.picture_as_pdf, color: AppTheme.primary), const SizedBox(width: 8),
-                Expanded(child: Text(_pdfName ?? '', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
+                Icon(Icons.picture_as_pdf, color: AppTheme.primary), const SizedBox(width: 8),
+                Expanded(child: Text(_pdfName ?? '', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
               ])),
               Expanded(child: PageSelectorGrid(pdfPath: _pdfPath!, pageCount: _pageCount, rotationOverrides: _rotations, onSelectionChanged: (s) => setState(() => _selected = s))),
               // Angle selector + rotate button
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                color: AppTheme.surface,
+                color: AppTheme.surf(context),
                 child: Row(children: [
                   Expanded(
                     child: SegmentedButton<int>(
                       segments: const [ButtonSegment(value: 90, label: Text('90°')), ButtonSegment(value: 180, label: Text('180°')), ButtonSegment(value: 270, label: Text('270°'))],
                       selected: {_selectedAngle},
                       onSelectionChanged: (s) => setState(() => _selectedAngle = s.first),
-                      style: SegmentedButton.styleFrom(backgroundColor: AppTheme.background, foregroundColor: AppTheme.textPrimary, selectedBackgroundColor: AppTheme.primary, selectedForegroundColor: Colors.white),
+                      style: SegmentedButton.styleFrom(backgroundColor: AppTheme.bg(context), foregroundColor: AppTheme.txtPrimary(context), selectedBackgroundColor: AppTheme.primary, selectedForegroundColor: Colors.white),
                     ),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
                     onPressed: _selected.isEmpty ? null : _rotateSelected,
                     style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
-                    child: const Text('Rotate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                    child: Text('Rotate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                   ),
                 ]),
               ),
               Padding(padding: const EdgeInsets.fromLTRB(20, 12, 20, 24), child: SizedBox(width: double.infinity, height: 56, child: ElevatedButton(
                 onPressed: _isProcessing ? null : _save,
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, disabledBackgroundColor: AppTheme.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, disabledBackgroundColor: AppTheme.surf(context), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                 child: _isProcessing
                     ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
-                    : const Text('Save Rotations', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                    : Text('Save Rotations', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
               ))),
             ]),
     );

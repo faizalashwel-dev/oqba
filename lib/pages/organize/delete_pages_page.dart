@@ -48,12 +48,12 @@ class _DeletePagesPageState extends State<DeletePagesPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.surface,
-        title: const Text('Delete Pages?', style: TextStyle(color: AppTheme.textPrimary)),
-        content: Text('Delete ${_selected.length} pages permanently?\nThis will create a new file with those pages removed.', style: const TextStyle(color: AppTheme.textSecondary)),
+        backgroundColor: AppTheme.surf(context),
+        title: Text('Delete Pages?', style: TextStyle(color: AppTheme.txtPrimary(context))),
+        content: Text('Delete ${_selected.length} pages permanently?\nThis will create a new file with those pages removed.', style: TextStyle(color: AppTheme.txtSecondary(context))),
         actions: [
-          OutlinedButton(onPressed: () => Navigator.pop(ctx, false), style: OutlinedButton.styleFrom(foregroundColor: AppTheme.textSecondary), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent), child: const Text('Delete Pages', style: TextStyle(color: Colors.white))),
+          OutlinedButton(onPressed: () => Navigator.pop(ctx, false), style: OutlinedButton.styleFrom(foregroundColor: AppTheme.txtSecondary(context)), child: Text('Cancel')),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent), child: Text('Delete Pages', style: TextStyle(color: Colors.white))),
         ],
       ),
     );
@@ -80,28 +80,28 @@ class _DeletePagesPageState extends State<DeletePagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bg(context),
       appBar: AppBar(
-        title: const Text('Delete Pages', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text('Delete Pages', style: TextStyle(fontWeight: FontWeight.w700)),
         actions: const [OfflineIndicator(), SizedBox(width: 12)],
       ),
       body: _pdfPath == null
           ? Center(child: GestureDetector(onTap: _pickFile, child: Container(
-              padding: const EdgeInsets.all(40), decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.redAccent.withAlpha(60))),
-              child: const Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.upload_file_rounded, color: Colors.redAccent, size: 48), SizedBox(height: 12), Text('Select PDF', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600, fontSize: 16))]))))
+              padding: const EdgeInsets.all(40), decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.redAccent.withAlpha(60))),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.upload_file_rounded, color: Colors.redAccent, size: 48), SizedBox(height: 12), Text('Select PDF', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600, fontSize: 16))]))))
           : Column(children: [
               Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Row(children: [
-                const Icon(Icons.picture_as_pdf, color: Colors.redAccent), const SizedBox(width: 8),
-                Expanded(child: Text(_pdfName ?? '', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
-                Text('$_pageCount pages', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                Icon(Icons.picture_as_pdf, color: Colors.redAccent), const SizedBox(width: 8),
+                Expanded(child: Text(_pdfName ?? '', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
+                Text('$_pageCount pages', style: TextStyle(color: AppTheme.txtSecondary(context), fontSize: 12)),
               ])),
               Expanded(child: PageSelectorGrid(pdfPath: _pdfPath!, pageCount: _pageCount, onSelectionChanged: (s) => setState(() => _selected = s))),
               Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 24), child: SizedBox(width: double.infinity, height: 56, child: ElevatedButton(
                 onPressed: _isProcessing ? null : _confirmDelete,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, disabledBackgroundColor: AppTheme.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, disabledBackgroundColor: AppTheme.surf(context), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                 child: _isProcessing
                     ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
-                    : Text('Delete ${_selected.length} Pages', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                    : Text('Delete ${_selected.length} Pages', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
               ))),
             ]),
     );

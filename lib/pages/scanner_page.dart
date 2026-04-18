@@ -131,17 +131,17 @@ class _ScannerPageState extends State<ScannerPage> {
                 color: AppTheme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt_rounded,
                 color: AppTheme.primary,
                 size: 48,
               ),
             ),
             const SizedBox(height: 28),
-            const Text(
+            Text(
               'Camera Access Required',
               style: TextStyle(
-                color: AppTheme.textPrimary,
+                color: AppTheme.txtPrimary(context),
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
               ),
@@ -179,7 +179,7 @@ class _ScannerPageState extends State<ScannerPage> {
                 ),
                 child: Text(
                   _permanentlyDenied ? 'Open Settings' : 'Grant Permission',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -228,7 +228,7 @@ class _ScannerPageState extends State<ScannerPage> {
                     color: AppTheme.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.document_scanner_rounded,
                     color: AppTheme.primary,
                     size: 28,
@@ -238,10 +238,10 @@ class _ScannerPageState extends State<ScannerPage> {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Processing scan...',
             style: TextStyle(
-              color: AppTheme.textPrimary,
+              color: AppTheme.txtPrimary(context),
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),

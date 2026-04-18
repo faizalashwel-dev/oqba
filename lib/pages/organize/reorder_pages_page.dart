@@ -67,22 +67,22 @@ class _ReorderPagesPageState extends State<ReorderPagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bg(context),
       appBar: AppBar(
-        title: const Text('Reorder Pages', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text('Reorder Pages', style: TextStyle(fontWeight: FontWeight.w700)),
         actions: const [OfflineIndicator(), SizedBox(width: 12)],
       ),
       body: _pdfPath == null
           ? Center(child: GestureDetector(onTap: _pickFile, child: Container(
-              padding: const EdgeInsets.all(40), decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.primary.withAlpha(60))),
-              child: const Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.upload_file_rounded, color: AppTheme.primary, size: 48), SizedBox(height: 12), Text('Select PDF', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600, fontSize: 16))]))))
+              padding: const EdgeInsets.all(40), decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.primary.withAlpha(60))),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.upload_file_rounded, color: AppTheme.primary, size: 48), SizedBox(height: 12), Text('Select PDF', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600, fontSize: 16))]))))
           : Column(children: [
               Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Row(children: [
-                const Icon(Icons.picture_as_pdf, color: AppTheme.primary), const SizedBox(width: 8),
-                Expanded(child: Text(_pdfName ?? '', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
-                Text('$_pageCount pages', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                Icon(Icons.picture_as_pdf, color: AppTheme.primary), const SizedBox(width: 8),
+                Expanded(child: Text(_pdfName ?? '', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
+                Text('$_pageCount pages', style: TextStyle(color: AppTheme.txtSecondary(context), fontSize: 12)),
               ])),
-              const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Drag to reorder pages', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12))),
+              Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Drag to reorder pages', style: TextStyle(color: AppTheme.txtSecondary(context), fontSize: 12))),
               const SizedBox(height: 8),
               Expanded(
                 child: ReorderableListView.builder(
@@ -100,7 +100,7 @@ class _ReorderPagesPageState extends State<ReorderPagesPage> {
                     return Container(
                       key: ValueKey('page_$originalPage'),
                       margin: const EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
                         leading: SizedBox(
                           width: 50, height: 65,
@@ -108,12 +108,12 @@ class _ReorderPagesPageState extends State<ReorderPagesPage> {
                             future: PageThumbnailService().getThumbnail(_pdfPath!, originalPage, width: 80),
                             builder: (ctx, snap) => snap.hasData && snap.data != null
                                 ? ClipRRect(borderRadius: BorderRadius.circular(4), child: Image.memory(snap.data!, fit: BoxFit.cover))
-                                : Container(decoration: BoxDecoration(color: AppTheme.background, borderRadius: BorderRadius.circular(4)), child: Center(child: Text('${originalPage + 1}', style: const TextStyle(color: AppTheme.textSecondary)))),
+                                : Container(decoration: BoxDecoration(color: AppTheme.bg(context), borderRadius: BorderRadius.circular(4)), child: Center(child: Text('${originalPage + 1}', style: TextStyle(color: AppTheme.txtSecondary(context))))),
                           ),
                         ),
-                        title: Text('Page ${originalPage + 1}', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
-                        subtitle: Text('Position ${index + 1}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
-                        trailing: const Icon(Icons.drag_handle, color: AppTheme.textSecondary),
+                        title: Text('Page ${originalPage + 1}', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600)),
+                        subtitle: Text('Position ${index + 1}', style: TextStyle(color: AppTheme.txtSecondary(context), fontSize: 11)),
+                        trailing: Icon(Icons.drag_indicator_rounded, color: AppTheme.txtSecondary(context)),
                       ),
                     );
                   },
@@ -124,7 +124,7 @@ class _ReorderPagesPageState extends State<ReorderPagesPage> {
                 style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                 child: _isProcessing
                     ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
-                    : const Text('Save Order', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                    : Text('Save Order', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
               ))),
             ]),
     );

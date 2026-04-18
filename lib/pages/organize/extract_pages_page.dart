@@ -61,12 +61,12 @@ class _ExtractPagesPageState extends State<ExtractPagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.bg(context),
       appBar: AppBar(
-        title: const Text('Extract Pages', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text('Extract Pages', style: TextStyle(fontWeight: FontWeight.w700)),
         actions: [
           if (_pdfPath != null)
-            TextButton(onPressed: () => _gridKey.currentState?.selectAll(), child: const Text('Select All', style: TextStyle(color: AppTheme.primary))),
+            TextButton(onPressed: () => _gridKey.currentState?.selectAll(), child: Text('Select All', style: TextStyle(color: AppTheme.primary))),
           const OfflineIndicator(), const SizedBox(width: 12),
         ],
       ),
@@ -76,11 +76,11 @@ class _ExtractPagesPageState extends State<ExtractPagesPage> {
                 onTap: _pickFile,
                 child: Container(
                   padding: const EdgeInsets.all(40),
-                  decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.primary.withAlpha(60))),
-                  child: const Column(mainAxisSize: MainAxisSize.min, children: [
+                  decoration: BoxDecoration(color: AppTheme.surf(context), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppTheme.primary.withAlpha(60))),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
                     Icon(Icons.upload_file_rounded, color: AppTheme.primary, size: 48),
                     SizedBox(height: 12),
-                    Text('Select PDF', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600, fontSize: 16)),
+                    Text('Select PDF', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600, fontSize: 16)),
                   ]),
                 ),
               ),
@@ -90,10 +90,10 @@ class _ExtractPagesPageState extends State<ExtractPagesPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(children: [
-                    const Icon(Icons.picture_as_pdf, color: AppTheme.primary),
+                    Icon(Icons.picture_as_pdf, color: AppTheme.primary),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(_pdfName ?? '', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
-                    Text('$_pageCount pages', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                    Expanded(child: Text(_pdfName ?? '', style: TextStyle(color: AppTheme.txtPrimary(context), fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
+                    Text('$_pageCount pages', style: TextStyle(color: AppTheme.txtSecondary(context), fontSize: 12)),
                   ]),
                 ),
                 Expanded(child: PageSelectorGrid(key: _gridKey, pdfPath: _pdfPath!, pageCount: _pageCount, onSelectionChanged: (s) => setState(() => _selected = s))),
@@ -103,10 +103,10 @@ class _ExtractPagesPageState extends State<ExtractPagesPage> {
                     width: double.infinity, height: 56,
                     child: ElevatedButton(
                       onPressed: _isProcessing ? null : _extract,
-                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, disabledBackgroundColor: AppTheme.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, disabledBackgroundColor: AppTheme.surf(context), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                       child: _isProcessing
                           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
-                          : Text('Extract ${_selected.length} Pages', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                          : Text('Extract ${_selected.length} Pages', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
                     ),
                   ),
                 ),
